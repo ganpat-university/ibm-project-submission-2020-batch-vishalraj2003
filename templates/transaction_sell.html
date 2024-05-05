@@ -1,0 +1,103 @@
+{% include 'header_user.html' %}
+
+<div class="container-fluid">
+        <div class="container d-flex justify-content-center" >
+            <div class="row d-flex justify-content-center">
+            <div class="col-lg col-md col-sm">
+            <div class="card" >
+              <div class="card-body">
+                <h5 class="card-title text-center">{{ company.companyName }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted text-center">{{ company.symbol }}</h6>
+                  <hr style="background-color: #0f5132; height: 2px">
+                      <div class="input-group ">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text fw-bolder" id="">Your balance</span>
+                          </div>
+                          <input type="number" class="form-control fw-bolder" style="background-color: #E5E5E5" readonly placeholder="{{ user.credit_balance }}">
+                          
+                        </div>
+{#                  </ul>#}
+{#                  <ul class="list-group list-group-flush">#}
+                      <div class="input-group">
+                          <div class="input-group-prepend">
+{#                            <span class="input-group-text bg-dark text-info" id="">Current stock Price</span>#}
+                              <span class="input-group-text fw-bolder" id="">Current stock Price</span>
+                          </div>
+                          <input type="number" class="form-control fw-bolder" style="background-color: #E5E5E5" readonly placeholder="{{ company.quote_price }}">
+                          
+                        </div>
+{#                  </ul>#}
+{#                  <ul class="list-group list-group-flush">#}
+                  <form id="purchaseForm" action="{% url 'sell_stock' company.symbol %}" method="post">
+                      {% csrf_token %}
+                      <div class="input-group">
+                          <div class="input-group-prepend ">
+                            <span class="input-group-text fw-bolder" id="">Quantity to sell:</span>
+                          </div>
+                          <input type="number" id="quantity" name="quantity" class="form-control fw-bolder " style="background-color: #E5E5E5"  value="1" min="1" required>
+                        </div>
+{#                  </ul>#}
+                  <hr style="background-color: #0f5132; height: 2px">
+                <div class="d-flex justify-content-center align-items-center">
+                        <button class="btn btn-danger btn-lg font-weight-bold" type="submit">Confirm Sell</button>
+                </div>
+{#                        <button class="btn btn-danger btn-lg font-weight-bold">Sell</button>#}
+                    
+                            <div  id="messageContainer" class=" alert alert-success" style="display: none;"></div>
+                    
+
+                    
+                  </form>
+              </div>
+            </div>
+            </div>
+            </div>
+
+    </div>
+            </div>
+        </div>
+</div>
+<script>
+    function showMessage(message, status) {
+        var messageContainer = document.getElementById('messageContainer');
+        messageContainer.innerHTML = message; // Set the message text
+        messageContainer.style.display = 'block'; // Make the container visible
+        
+        
+        messageContainer.className = '';
+        if (status === 'success') {
+            messageContainer.classList.add('alert', 'alert-success');
+        } else {
+            messageContainer.classList.add('alert', 'alert-danger');
+        }
+    }
+    document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        var balanceInput = document.querySelector('input[placeholder="{{ user.credit_balance }}"]'); // Update the selector as needed
+    
+        fetch("{% url 'sell_stock' company.symbol %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            var messageContainer = document.getElementById('messageContainer');
+            showMessage(data.message, data.status);
+    
+            if (data.status === "success") {
+                var newBalance = parseFloat(data.new_balance);
+                balanceInput.value = newBalance.toFixed(2); // Update the input field with the new balance
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('An error occurred. Please try again.', 'error');
+        });
+    });
+    
+</script>
+

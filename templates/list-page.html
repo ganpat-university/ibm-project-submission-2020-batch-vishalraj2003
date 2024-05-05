@@ -1,0 +1,467 @@
+{% include 'header_user.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .table td, .table th {
+            border-top: none;
+        }
+        #companyListContainer {
+            max-height: 100vh;
+            overflow-y: auto;
+            width: 100%;
+        }
+        
+        @media (min-width: 992px) { 
+            #companyListContainer {
+                max-width: 25%; 
+            }
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            {#overflow: hidden; /* This prevents the main page from scrolling */#}
+        }
+        
+        @media (max-width: 991px) {
+            #companyListContainer {
+                max-width: 100%;
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                width: 95vw;
+            }
+        }
+    {#    eye catching button#}
+        /* Custom styling for the Buy and Sell buttons */
+.btn-primary,
+.btn-danger {
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.btn-primary:hover,
+.btn-danger:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary:focus,
+.btn-danger:focus {
+    box-shadow: none;
+}
+
+.rounded-pill {
+    border-radius: 50px;
+}
+
+/* Optional: Adjust padding and font size */
+.btn1 {
+    font-size: 18px;
+    padding: 10px 20px;
+}
+
+.prediction-container {
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        .prediction-card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .prediction-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .prediction-date {
+            font-size: 18px;
+            color: #555;
+        }
+
+        .prediction-price {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Dynamic background colors */
+        .color-1 { background-color: #f8d7da; }
+        .color-2 { background-color: #d4edda; }
+        .color-3 { background-color: #d1ecf1; }
+        .color-4 { background-color: #fff3cd; }
+        .color-5 { background-color: #fde2e4; }
+        .color-6 { background-color: #bee5eb; }
+    
+    </style>
+
+<style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            {#margin-top: 20px;#}
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #fff;
+            padding: 20px 0;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+
+        .header-section h2 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header-section p {
+            font-size: 18px;
+            color: #bdc3c7;
+        }
+        
+
+        /* Default placeholder size */
+    #searchInput::placeholder {
+        font-size: 16px; /* Adjust the size as needed */
+    }
+
+    /* Smaller placeholder size for laptop screens */
+    @media (min-width: 992px) { /* Assuming laptop screens start from 992px in width */
+        #searchInput::placeholder {
+            font-size: 14px; /* Smaller font size for the placeholder */
+        }
+    }
+    </style>
+
+
+
+<body>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <!-- Sidebar / Company List -->
+
+        <div class="col-12 col-md-5 col-lg-3 vh-100 overflow-auto" id="companyListContainer">
+        <!-- search box -->
+        <div class="input-group mb-3" id="searchContainer">
+        <form action="" method="GET">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Search Companies" id="searchInput" name="search" value="{{ search_query }}">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="submit">Search</button>
+                <a href="{% url 'list' %}" class="btn btn-outline-danger">Clear</a>
+            </div>
+        </div>
+    </form>
+    </div>
+        
+        
+        
+            <div class="list-group" id="companyList">
+                
+                {% for company in companyData %}
+                <a href="#" class="list-group-item list-group-item-action d-flex flex-wrap" data-company="{{ company.symbol }}">
+                    <div class="col-6 col-md-4 p-2 me-md-5 company-name">{{ company.companyName }}</div>
+                    <div class="col-3 col-md-4 p-2 pe-4 d-sm-block  d-none d-md-none d-lg-none company-symbol">{{ company.symbol }}</div>
+                    <div class="col-3 col-md-4  p-2 company-quote-price">{{ company.quote_price|floatformat:2 }}</div>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="container-fluid">
+                <nav aria-label="...">
+                  <ul class="pagination">
+                    <li class="page-item">
+                      <a class="page-link" href="/list/?page=1" tabindex="-1">First</a>
+                    </li>
+                    {% for n in page_range %}
+                    <li class="page-item {% if companyData.number == n %}active{% endif %}">
+                        <a class="page-link" href="/list/?page={{ n }}&search={{ search_query }}"> {{ n }} </a>
+                    </li>
+                    {% endfor %}
+
+                  <li class="page-item">
+                      <a class="page-link" href="/list/?page={{ last_page }}" tabindex="-1">last</a>
+                    </li>
+                  </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="col-12 col-md-7 col-lg-9 bg-light vh-100">
+            
+            <div class="content p-4 card">
+                <h1 id="companyTitle" class="text-primary card-header text-center">Select a Company</h1>
+                <div class="card-footer text-center">
+                    <div id="companyPrice" class="text-success fw-bold fs-2"></div>
+                </div>
+                
+                <div id="description"></div>
+                <div class="container-fluid border-4 p-3 ">
+                    <div class="container card">
+                        <div class="row text-uppercase align-items-center prediction-container" id="tips">
+
+                        </div>
+
+
+                        <div class="row" id="button">
+
+                        </div>
+
+                    </div>
+                </div>
+                <div id="plotlyGraphContainer"  class="bg-light card m-3" style="width:100%;height:500px;"></div>
+                <div id="companyDetails" class="card p-3"></div>
+
+
+
+
+
+
+                
+            
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Bootstrap and Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+{#<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>#}
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script>
+    function shouldShowRow(data) {
+    return data;
+}
+    function splitDescription(description) {
+    const words = description.split(/\s+/); // Split by whitespace
+    if (words.length <= 50) {
+        return { firstPart: description, secondPart: '' };
+    }
+    const firstPart = words.slice(0, 50).join(' ');
+    const secondPart = words.slice(50).join(' ');
+    return { firstPart, secondPart };
+}
+    function renderPlotlyGraph(stockData) {
+    var trace = {
+        x: stockData.date, // Array of dates
+        close: stockData.close, // Array of close prices
+        decreasing: {line: {color: 'red'}},
+        high: stockData.high, // Array of high prices
+        increasing: {line: {color: 'green'}},
+        low: stockData.low, // Array of low prices
+        open: stockData.open, // Array of open prices
+        type: 'candlestick',
+    };
+
+    var layout = {
+        title: 'Stock Price',
+        xaxis: {
+            title: 'Date',
+            rangeslider: {
+                visible: true
+            }
+        },
+        yaxis: {
+            title: 'Price'
+        }
+    };
+
+    var data = [trace];
+
+    Plotly.newPlot('plotlyGraphContainer', data, layout);
+}
+
+    $(document).ready(function() {
+        $('#searchInput').on('keyup', function() {
+            var value = $(this).val().toLowerCase();
+            $("#companyList a").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+        $('#clearSearch').click(function() {
+            $('#searchInput').val('');
+            window.location.href = '{% url 'list' %}';
+        });
+
+    $('#companyList a').on('click', function(e) {
+        e.preventDefault();
+        const symbol = $(this).data('company');
+
+
+        $.ajax({
+            url: `/api/company/${symbol}/`,  // Make sure to use the correct URL
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                console.log(data)
+var recommendation = data.recommendation;
+console.log("my values" + recommendation);
+
+
+var predictionsHtml = `
+        <div class="text-center mb-5">
+            <h2 class="mb-3">${data.recommendation}</h2>
+            <p>Below are the future 7 day prices with dates:</p>
+        </div>
+        <div class="header-section text-center">
+            <h2 class="mb-3">Tip: ${data.recommendation}</h2>
+            <p>Below are the future 7 day prices with dates:</p>
+        </div>
+        <div class="row">`;
+
+const colorClasses = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6'];
+
+
+if (data.predictions_with_dates) {
+    data.predictions_with_dates.forEach(function(prediction, index) {
+        const colorClass = colorClasses[index % colorClasses.length];
+        predictionsHtml += `
+            <div class="col-md-4">
+                <div class="prediction-card p-4 ${colorClass}">
+                    <h6 class="prediction-date">${prediction[0]}</h6>
+                    <p class="prediction-price">₹${parseFloat(prediction[1]).toFixed(3)}</p>
+                </div>
+            </div>`;
+    });
+}
+
+predictionsHtml += `</div></div>`;
+                $('#companyTitle').html(`
+    <h1 class="display-4 text-center mb-4">${data.companyName} (${data.symbol})</h1>
+`);
+
+$('html, body').animate({
+            scrollTop: $("#companyTitle").offset().top - 100 // Adjust the offset as needed
+        }, 500); // 500ms for animation speed
+
+$('#companyPrice').text(`₹${parseFloat(data.quote_price).toFixed(2)}`);
+
+const { firstPart, secondPart } = splitDescription(data.description);
+
+// HTML to display the description
+$('#description').html(`
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <h3 class="card-title">Description</h3>
+        </div>
+        <div class="card-body">
+            <p class="card-text">${firstPart} <span id="moreText" style="display: none;">${secondPart}</span>
+            ${secondPart ? '<a href="#" id="moreLink">More Details</a>' : ''}</p>
+        </div>
+    </div>
+`);
+$(document).on('click', '#moreLink', function(e) {
+    e.preventDefault();
+    $('#moreText').show(); // Show the rest of the text
+    $(this).hide(); // Hide the "More Details" link
+});
+                $('#companyDetails').html(`
+    <div class="container mt-5">
+        <h3 class="text-info text-center mb-4">Tabular Summary</h3>
+        <div class="row">
+            <div class="col">
+                <table class="table table-bordered table-striped">
+                    <tbody>
+                        ${shouldShowRow(data.previous_close) ? `<tr><th scope="row">Previous Close</th><td>${data.previous_close}</td></tr>` : ''}
+                        ${shouldShowRow(data.open_price) ? `<tr><th scope="row">Open</th><td>${data.open_price}</td></tr>` : ''}
+                        ${shouldShowRow(data.bid) ? `<tr><th scope="row">Bid</th><td>${data.bid}</td></tr>` : ''}
+                        ${shouldShowRow(data.ask) ? `<tr><th scope="row">Ask</th><td>${data.ask}</td></tr>` : ''}
+                        ${shouldShowRow(data.days_range) ? `<tr><th scope="row">Day's Range</th><td>${data.days_range}</td></tr>` : ''}
+                        ${shouldShowRow(data.fifty_two_week_range) ? `<tr><th scope="row">52 Week Range</th><td>${data.fifty_two_week_range}</td></tr>` : ''}
+                        ${shouldShowRow(data.volume) ? `<tr><th scope="row">Volume</th><td>${data.volume}</td></tr>` : ''}
+                        ${shouldShowRow(data.avg_volume) ? `<tr><th scope="row">Avg. Volume</th><td>${data.avg_volume}</td></tr>` : ''}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col">
+                <table class="table table-bordered table-striped">
+                    <tbody>
+                        ${shouldShowRow(data.market_cap) ? `<tr><th scope="row">Market Cap</th><td>${data.market_cap}</td></tr>` : ''}
+                        ${shouldShowRow(data.beta_5y_monthly) ? `<tr><th scope="row">Beta (5Y Monthly)</th><td>${data.beta_5y_monthly}</td></tr>` : ''}
+                        ${shouldShowRow(data.pe_ratio_ttm) ? `<tr><th scope="row">PE Ratio (TTM)</th><td>${data.pe_ratio_ttm}</td></tr>` : ''}
+                        ${shouldShowRow(data.eps_ttm) ? `<tr><th scope="row">EPS (TTM)</th><td>${data.eps_ttm}</td></tr>` : ''}
+                        ${shouldShowRow(data.earnings_date) ? `<tr><th scope="row">Earnings Date</th><td>${data.earnings_date}</td></tr>` : ''}
+                        ${shouldShowRow(data.forward_dividend_yield) ? `<tr><th scope="row">Forward Dividend & Yield</th><td>${data.forward_dividend_yield}</td></tr>` : ''}
+                        ${shouldShowRow(data.ex_dividend_date) ? `<tr><th scope="row">Ex-Dividend Date</th><td>${data.ex_dividend_date}</td></tr>` : ''}
+                        ${shouldShowRow(data.one_year_target_est) ? `<tr><th scope="row">1y Target Est</th><td>${data.one_year_target_est}</td></tr>` : ''}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+`);
+
+                $('#currentPriceInput').val(parseFloat(data.quote_price).toFixed(2));
+                $('#button').html(`
+{#                    {% include 'transaction.html' %}#}
+                    <div class="container-fluid">
+                        <div class="row justify-content-center">
+                            <div class="col-auto">
+                                <form action="{% url 'transaction'  %}" method="get">
+
+                                <input type="hidden" readonly name="company_symbol" id="companySymbolInput">
+                                {#<p>sysmbol is ${data.symbol}</p>#}
+                                <button type="submit" class="btn1 btn-lg btn-primary rounded-pill px-4 py-2">Buy</button>
+
+                                {#<button type="submit" class="btn btn-danger btn-lg font-weight-bold">Sell</button>#}
+                                </form>
+                            </div>
+                            <div class="col-auto">
+                                <form action="{% url 'transaction_sell'  %}" method="get">
+
+                                     <input type="hidden" readonly name="company_symbol" id="companySymbolInput2">
+                                    {#<p>sysmbol is ${data.symbol}</p>#}
+                                    <button type="submit" class="btn1 btn-lg btn-danger rounded-pill px-4 py-2">Sell</button>
+
+                                    {#<button type="submit" class="btn btn-danger btn-lg font-weight-bold">Sell</button>#}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                $('#companySymbolInput').val(data.symbol);
+                $('#companySymbolInput2').val(data.symbol);
+
+                $('#tips').html(predictionsHtml);
+
+                {#$('#companySymbolInput').val(data.symbol);#}
+                renderPlotlyGraph(data.stockData);
+            },
+            error: function(error) {
+                console.log(error);
+                $('#companyDetails').html(`<p>Error fetching data for ${symbol}</p>`);
+            }
+        });
+
+    });
+});
+    $(document).on('click', '.btn-buy', function() {
+    var companySymbol = $('#companySymbolInput').val();
+    var currentPrice = $('#currentPriceInput').val();
+    // Add any other data you need to send
+
+    // Construct the URL with query parameters
+    var url = `/transaction/?company_symbol=${companySymbol}&current_price=${currentPrice}`;
+    // Redirect to the constructed URL
+    window.location.href = url;
+});
+
+</script>
+</body>

@@ -1,0 +1,105 @@
+{% include 'header_user.html' %}
+
+
+<div class="container-fluid">
+        <div class="container d-flex justify-content-center" >
+            <div class="row d-flex justify-content-center">
+            <div class="col-lg col-md col-sm">
+            <div class="card" >
+              <div class="card-body">
+                <h5 class="card-title text-center">{{ company.companyName }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted text-center">{{ company.symbol }}</h6>
+                  <hr style="background-color: #0f5132; height: 2px">
+                      <div class="input-group ">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text fw-bolder" id="">Your balance</span>
+                          </div>
+                          <input type="number" id="userBalance" class="form-control fw-bolder" style="background-color: #E5E5E5" readonly placeholder="Your balance" value="{{ user.credit_balance }}">
+                        </div>
+{#                  </ul>#}
+{#                  <ul class="list-group list-group-flush">#}
+                      <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text fw-bolder" id="">Current stock Price</span>
+                          </div>
+                          <input type="number" class="form-control fw-bolder" style="background-color: #E5E5E5" readonly placeholder="{{ company.quote_price }}">
+                        </div>
+{#                  </ul>#}
+{#                  <ul class="list-group list-group-flush">#}
+                  <form id="purchaseForm" action="{% url 'buy_stock' company.symbol %}" method="post">
+                      {% csrf_token %}
+                      <div class="input-group">
+                          <div class="input-group-prepend ">
+                            <span class="input-group-text fw-bolder" id="">Quantity:</span>
+                          </div>
+                          <input type="number" id="quantity" name="quantity" class="form-control fw-bolder "  value="1" min="1" style="background-color: #E5E5E5" required>
+                        </div>
+{#                  </ul>#}
+                  <hr style="background-color: #0f5132; height: 2px">
+                <div class="d-flex justify-content-center align-items-center">
+                        <button class="btn btn-primary btn-lg font-weight-bold" type="submit">Confirm Buy</button>
+                </div>
+{#                        <button class="btn btn-danger btn-lg font-weight-bold">Sell</button>#}
+                    
+                            <div  id="messageContainer" class=" alert alert-success" style="display: none;"></div>
+                    
+
+                    
+                  </form>
+              </div>
+            </div>
+            </div>
+            </div>
+
+    </div>
+            </div>
+        </div>
+</div>
+<script>
+    // Define JavaScript variables from Django template variables
+    var userCreditBalance = parseFloat("{{ user.credit_balance }}");
+    var companyQuotePrice = parseFloat("{{ company.quote_price }}");
+
+    document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        var quantityInput = document.getElementById('quantity'); // Get the quantity input
+        var balanceInput = document.querySelector('input[placeholder="{{ user.credit_balance }}"]'); // Get the balance input
+        
+        var balanceInput = document.getElementById('userBalance');
+        fetch("{% url 'buy_stock' company.symbol %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            var messageContainer = document.getElementById('messageContainer');
+            messageContainer.innerHTML = ''; // Clear previous messages
+            
+            // Show the message from the response
+            showMessage(data.message, data.status);
+
+            // If the purchase was successful, update the displayed balance
+            if(data.status === "success") {
+                // Calculate new balance
+                var newBalance = userCreditBalance - (quantityInput.value * companyQuotePrice);
+                balanceInput.placeholder = newBalance.toFixed(2); // Update the placeholder with the new balance
+                balanceInput.value = newBalance.toFixed(2);// Update the value if it's not a placeholder
+                console.log(newBalance);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    function showMessage(message, status) {
+        var messageContainer = document.getElementById('messageContainer');
+        messageContainer.textContent = message;
+        messageContainer.style.display = 'block';
+        messageContainer.className = status === "success" ? 'alert alert-success' : 'alert alert-danger';
+    }
+</script>
+
+
