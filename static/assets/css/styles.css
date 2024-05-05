@@ -1,0 +1,12 @@
+.form::placeholder {
+  color: var(--bs-border-color);
+}
+
+.custom-bg {
+}
+.custom-placeholder::placeholder {
+    color: red;
+}
+
+/* General Styles */
+
